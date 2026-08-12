@@ -1,0 +1,1045 @@
+<!-- נושא: טריגו בסיס - זיהוי וחישוב פונקציות | רמה: י' 4 יח"ל | מאפיינים: ללא מגבלת זמן | תיאור אפליקציה: קידום מטוראי למפקד -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>מסלול קידום – טריגונומטריה</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700;900&family=Rubik:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #020a02;
+      --bg2:      #030f03;
+      --panel:    #071407;
+      --panel2:   #0a1a0a;
+      --neon:     #00ff41;
+      --neon-dim: #00cc33;
+      --danger:   #ff2040;
+      --warn:     #ffbb00;
+      --accent:   #ffbb00;
+      --green:    #00ff41;
+      --red:      #ff2040;
+      --text:     #c8ffc8;
+      --text-dim: #5a8a5a;
+      --border:   rgba(0,255,65,0.25);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body {
+      font-family:'Heebo',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(0,255,65,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(0,255,65,0.03) 0%, transparent 50%);
+    }
+    .screen { display:none; }
+    .screen.active { display:flex; }
+
+    /* ── INTRO ── */
+    #screen-intro {
+      min-height:100vh; flex-direction:column;
+      align-items:center; justify-content:center; padding:24px;
+    }
+    .intro-card {
+      background:var(--panel); border:1.5px solid var(--border);
+      border-radius:20px; padding:32px 28px; width:100%; max-width:420px;
+      box-shadow:0 0 40px rgba(0,255,65,0.15);
+    }
+    .logo-area { text-align:center; margin-bottom:28px; }
+    .logo-area h1 {
+      font-family:'Rubik',sans-serif; font-size:2rem; font-weight:900;
+      color:var(--neon); line-height:1.1;
+    }
+    .logo-area .sub { font-size:0.85rem; color:var(--text-dim); margin-top:6px; letter-spacing:1px; }
+    .field label { display:block; font-size:0.8rem; font-weight:600; color:var(--neon); margin-bottom:6px; }
+    .field input {
+      width:100%; background:var(--bg2); border:1.5px solid var(--border);
+      border-radius:10px; padding:12px 14px; color:var(--text);
+      font-family:'Heebo',sans-serif; font-size:1rem; outline:none;
+      transition:border-color .2s;
+    }
+    .field input:focus { border-color:var(--neon); }
+    .field { margin-bottom:16px; }
+    .gender-row { display:flex; gap:10px; margin-bottom:20px; }
+    .gender-btn {
+      flex:1; padding:11px; border-radius:10px; border:1.5px solid var(--border);
+      background:transparent; color:var(--text-dim); font-family:'Heebo',sans-serif;
+      font-size:0.95rem; font-weight:700; cursor:pointer; transition:all .2s;
+    }
+    .gender-btn.active { background:rgba(0,255,65,0.2); border-color:var(--neon); color:var(--neon); }
+    .btn-start {
+      width:100%; padding:14px; border-radius:12px; border:none;
+      background:linear-gradient(135deg,var(--neon),#00cc33);
+      color:#020a02; font-family:'Heebo',sans-serif; font-size:1.1rem; font-weight:900;
+      cursor:pointer; box-shadow:0 4px 20px rgba(0,255,65,0.4); transition:all .2s;
+    }
+    .btn-start:active { transform:scale(0.97); }
+
+    /* ── GAME ── */
+    #screen-game {
+      min-height:100vh; flex-direction:column;
+      max-width:480px; margin:0 auto; padding:16px;
+    }
+    .top-bar {
+      display:flex; justify-content:space-between; align-items:center;
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:14px; padding:12px 16px; margin-bottom:14px;
+    }
+    .top-stat { text-align:center; }
+    .top-stat .val {
+      font-family:'Rubik',sans-serif; font-size:1.4rem; font-weight:900; color:var(--neon);
+    }
+    .top-stat .lbl { font-size:0.7rem; color:var(--text-dim); margin-top:1px; }
+    .missiles-row { display:flex; gap:5px; align-items:center; }
+    .missile-dot {
+      width:10px; height:10px; border-radius:50%;
+      background:var(--border); transition:background .3s;
+    }
+    .missile-dot.done { background:var(--green); }
+    .missile-dot.active { background:var(--neon); box-shadow:0 0 6px var(--neon); }
+    .missile-dot.failed { background:var(--red); }
+
+    .scenario-box {
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:14px; padding:14px 16px; margin-bottom:12px;
+    }
+    .scenario-box .mission-label {
+      font-size:0.7rem; font-weight:700; color:var(--neon); letter-spacing:1px;
+      text-transform:uppercase; margin-bottom:6px;
+    }
+    .scenario-box p { font-size:0.92rem; line-height:1.6; color:var(--text); }
+
+    /* ── RADAR (triangle SVG) ── */
+    .radar-box {
+      background:#060010; border:1.5px solid var(--border);
+      border-radius:14px; padding:16px; margin-bottom:12px;
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+    }
+
+
+    /* ── FUNCTION SELECTOR ── */
+    .fn-section { margin-bottom:12px; }
+    .fn-buttons { display:flex; gap:10px; }
+    .fn-btn {
+      flex:1; padding:14px 8px; border-radius:12px;
+      border:2px solid var(--border); background:var(--panel2);
+      color:var(--text); font-family:'Rubik',sans-serif; font-size:1rem; font-weight:700;
+      cursor:pointer; transition:all .18s; text-align:center;
+    }
+    .fn-btn:active { transform:scale(0.95); }
+    .fn-btn.selected-correct {
+      border-color:var(--green); background:rgba(0,255,65,0.15); color:var(--green);
+      pointer-events:none;
+    }
+    .fn-btn.selected-wrong {
+      border-color:var(--red); background:rgba(255,32,64,0.12); color:var(--red);
+      animation:shake .4s;
+    }
+    @keyframes shake {
+      0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
+    }
+
+    /* ── ANSWER INPUT ── */
+    .answer-section { margin-bottom:12px; }
+    .answer-row { display:flex; gap:8px; }
+    .answer-input {
+      flex:1; background:var(--bg2); border:1.5px solid var(--border);
+      border-radius:10px; padding:12px 14px; color:var(--text);
+      font-family:'Rubik',sans-serif; font-size:1.1rem; outline:none;
+      text-align:center; direction:ltr; transition:border-color .2s;
+    }
+    .answer-input:focus { border-color:var(--neon); }
+    .btn-check {
+      padding:12px 20px; border-radius:10px; border:none;
+      background:var(--neon); color:#020a02;
+      font-family:'Heebo',sans-serif; font-size:1rem; font-weight:700;
+      cursor:pointer; white-space:nowrap; transition:all .2s;
+    }
+    .btn-check:active { transform:scale(0.95); }
+    .btn-check:disabled { opacity:0.4; cursor:not-allowed; }
+
+    /* ── FEEDBACK OVERLAY ── */
+    .feedback-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.85);
+      display:none; align-items:center; justify-content:center;
+      flex-direction:column; gap:12px; z-index:100; text-align:center; padding:24px;
+    }
+    .feedback-overlay.show { display:flex; }
+    .feedback-icon { font-size:3.5rem; }
+    .feedback-msg {
+      font-family:'Rubik',sans-serif; font-size:1.4rem; font-weight:900; line-height:1.3;
+    }
+    .feedback-pts {
+      font-size:1rem; color:var(--text-dim);
+    }
+    .feedback-pts .pts-val { color:var(--accent); font-weight:700; font-size:1.2rem; }
+
+    /* ── OUTRO ── */
+    #screen-outro {
+      min-height:100vh; flex-direction:column;
+      align-items:center; justify-content:center; padding:24px;
+    }
+    .outro-card {
+      background:var(--panel); border:1.5px solid var(--border);
+      border-radius:20px; padding:32px 24px; width:100%; max-width:420px;
+      text-align:center; box-shadow:0 0 40px rgba(0,255,65,0.2);
+    }
+    .outro-rank {
+      font-family:'Rubik',sans-serif; font-size:1.6rem; font-weight:900;
+      color:var(--neon); margin-bottom:6px;
+    }
+    .outro-score {
+      font-family:'Rubik',sans-serif; font-size:3rem; font-weight:900;
+      color:var(--accent); line-height:1;
+    }
+    .outro-max { font-size:0.85rem; color:var(--text-dim); margin-bottom:20px; }
+    .outro-stats {
+      display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;
+    }
+    .stat-box {
+      background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:12px;
+    }
+    .stat-box .sv { font-family:'Rubik',sans-serif; font-size:1.4rem; font-weight:700; color:var(--neon); }
+    .stat-box .sl { font-size:0.75rem; color:var(--text-dim); margin-top:2px; }
+    /* per-stage breakdown table */
+    .breakdown-table { width:100%; border-collapse:collapse; font-size:0.8rem; margin-bottom:16px; }
+    .breakdown-table thead tr { background:rgba(0,255,65,0.3); }
+    .breakdown-table th {
+      padding:7px 10px; text-align:start; font-weight:700; font-size:0.72rem;
+      color:var(--neon); letter-spacing:0.3px;
+    }
+    .breakdown-table td { padding:6px 10px; border-bottom:1px solid var(--border); }
+    .breakdown-table tr:last-child td { border-bottom:none; }
+    .breakdown-table tr:nth-child(even) td { background:rgba(0,255,65,0.05); }
+    .pts-cell { font-family:'Rubik',sans-serif; font-weight:700; color:var(--accent); }
+    .ok-cell { color:var(--green); font-weight:700; }
+    .err-cell { color:#fca5a5; }
+    .report-text {
+      background:var(--bg2); border:1px solid var(--border); border-radius:10px;
+      padding:12px; font-size:0.8rem; color:var(--text-dim); text-align:end;
+      line-height:1.8; margin-bottom:16px; font-family:'Rubik',sans-serif;
+    }
+    .btn-copy {
+      width:100%; padding:13px; border-radius:12px; border:none; cursor:pointer;
+      font-family:'Heebo',sans-serif; font-size:1rem; font-weight:700; margin-bottom:10px;
+      transition:all .2s;
+    }
+    .btn-copy.idle { background:rgba(0,255,65,0.15); color:var(--neon); border:1.5px solid var(--border); }
+    .btn-copy.copied { background:var(--green); color:#020a02; }
+    .btn-restart {
+      background:none; border:none; color:var(--text-dim); font-family:'Heebo',sans-serif;
+      font-size:0.85rem; cursor:pointer; text-decoration:underline;
+    }
+
+    /* ── Interception Animation ── */
+    #intercept-anim {
+      position:fixed; inset:0; pointer-events:none; z-index:150;
+      display:none; overflow:hidden;
+    }
+    #intercept-anim.playing { display:block; }
+    .ia-missile {
+      position:absolute; right:-60px; top:-60px; width:36px; height:36px;
+    }
+    .ia-missile.go { animation:missileTravel .55s cubic-bezier(.4,0,.2,1) forwards; }
+    @keyframes missileTravel {
+      0%   { right:-60px;              top:-60px;              opacity:1; transform:rotate(225deg) scale(1);   }
+      85%  { right:calc(50vw - 18px);  top:calc(50vh - 18px);  opacity:1; transform:rotate(225deg) scale(1);   }
+      100% { right:calc(50vw - 18px);  top:calc(50vh - 18px);  opacity:0; transform:rotate(225deg) scale(.2); }
+    }
+    .ia-explode {
+      position:absolute; left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      border-radius:50%; width:0; height:0; opacity:0;
+    }
+    .ia-explode.r1 { animation:explodeRing .6s .50s ease-out forwards; border:3px solid #f59e0b; }
+    .ia-explode.r2 { animation:explodeRing .7s .56s ease-out forwards; border:3px solid #00ff41; }
+    .ia-explode.r3 { animation:explodeRing .8s .62s ease-out forwards; border:3px solid #ff2040; }
+    @keyframes explodeRing {
+      0%   { width:0;     height:0;     margin-left:0;    margin-top:0;    opacity:.9; }
+      100% { width:180px; height:180px; margin-left:-90px; margin-top:-90px; opacity:0; }
+    }
+    .ia-check {
+      position:absolute; left:50%; top:50%;
+      transform:translate(-50%,-50%) scale(0); opacity:0;
+      animation:checkPop .4s .78s cubic-bezier(.175,.885,.32,1.275) forwards;
+    }
+    @keyframes checkPop {
+      0%   { opacity:0; transform:translate(-50%,-50%) scale(0);    }
+      70%  { opacity:1; transform:translate(-50%,-50%) scale(1.25); }
+      100% { opacity:1; transform:translate(-50%,-50%) scale(1);    }
+    }
+
+    /* ── RANK TOAST ── */
+    #rank-toast {
+      position:fixed; bottom:40px; left:50%;
+      transform:translateX(-50%) translateY(100px);
+      background:linear-gradient(135deg,#0d2e0d,#061406);
+      border:2px solid var(--neon); border-radius:16px;
+      padding:14px 28px; z-index:9999; text-align:center;
+      font-family:'Rubik',sans-serif; font-size:1.05rem; font-weight:700;
+      color:var(--neon); box-shadow:0 0 28px rgba(0,255,65,0.5);
+      opacity:0; pointer-events:none;
+      transition:transform .4s cubic-bezier(.175,.885,.32,1.275), opacity .4s;
+      white-space:nowrap;
+    }
+    #rank-toast.show {
+      transform:translateX(-50%) translateY(0);
+      opacity:1;
+    }
+
+    /* ── RTL/LTR Isolation for numeric display ── */
+    .val, .sv, .outro-score {
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+    .pts-val { direction: ltr; unicode-bidi: isolate; }
+    .mission-label, #scenario-text, .report-text { unicode-bidi: plaintext; }
+
+    /* ── EXPLAIN OVERLAY ── */
+    .explain-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.93);
+      display:none; align-items:center; justify-content:center;
+      z-index:110; padding:20px; overflow-y:auto;
+    }
+    .explain-overlay.show { display:flex; }
+    .explain-card {
+      background:var(--panel); border:1.5px solid var(--warn);
+      border-radius:16px; padding:24px 20px; width:100%; max-width:420px;
+      text-align:center; box-shadow:0 0 32px rgba(255,187,0,0.25);
+    }
+    .explain-title {
+      font-family:'Rubik',sans-serif; font-size:1.05rem; font-weight:900;
+      color:var(--warn); margin-bottom:10px;
+    }
+    .explain-answer {
+      font-family:'Rubik',sans-serif; font-size:1.45rem; font-weight:900;
+      color:var(--neon); margin-bottom:14px;
+      padding:10px; background:rgba(0,255,65,0.1); border-radius:10px;
+    }
+    .explain-label {
+      font-size:0.8rem; font-weight:700; color:var(--warn);
+      text-decoration:underline; margin-bottom:10px;
+    }
+    .explain-section {
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09);
+      border-radius:10px; padding:14px 12px; margin-bottom:16px;
+    }
+    .explain-step-eq {
+      font-family:'Rubik',sans-serif; font-size:1rem; color:#fff;
+      direction:ltr; unicode-bidi:isolate; margin-bottom:6px;
+    }
+    .explain-step-text {
+      font-size:0.85rem; font-weight:700; color:var(--warn); margin-bottom:6px;
+    }
+    .explain-step-result {
+      font-family:'Rubik',sans-serif; font-size:1.15rem; font-weight:900;
+      color:var(--neon); margin-top:4px;
+    }
+
+    /* ── TOAST ── */
+    #general-toast {
+      position:fixed; bottom:40px; left:50%;
+      transform:translateX(-50%) translateY(100px);
+      background:linear-gradient(135deg,#0d2e0d,#061406);
+      border:2px solid var(--neon); border-radius:14px;
+      padding:12px 24px; z-index:9999; text-align:center;
+      font-family:'Rubik',sans-serif; font-size:0.95rem; font-weight:700;
+      color:var(--neon); box-shadow:0 0 24px rgba(0,255,65,0.45);
+      opacity:0; pointer-events:none;
+      transition:transform .35s cubic-bezier(.175,.885,.32,1.275), opacity .35s;
+    }
+    #general-toast.show {
+      transform:translateX(-50%) translateY(0);
+      opacity:1;
+    }
+
+    /* ── Visual Fraction ── */
+    .step-frac {
+      display:inline-flex; flex-direction:column;
+      align-items:center; vertical-align:middle;
+      margin:0 4px; font-size:0.92em; line-height:1.25;
+    }
+    .sf-num {
+      border-bottom:1.5px solid #fff; padding:0 6px 3px;
+      text-align:center; min-width:2em;
+    }
+    .sf-den {
+      padding:3px 6px 0; text-align:center; min-width:2em;
+    }
+
+    /* ── Mobile padding fix ── */
+    @media (max-width: 768px) {
+      #screen-game { padding-top: 85px !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ INTRO ══ -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-card">
+    <div class="logo-area">
+      <svg width="56" height="56" viewBox="0 0 56 56" style="margin-bottom:10px">
+        <circle cx="28" cy="28" r="27" fill="rgba(0,255,65,0.15)" stroke="rgba(0,255,65,0.5)" stroke-width="1.5"/>
+        <path d="M28 8 L32 24 L44 28 L32 32 L28 48 L24 32 L12 28 L24 24 Z" fill="#00ff41" opacity="0.8"/>
+        <path d="M28 16 L30 24 L38 28 L30 32 L28 40 L26 32 L18 28 L26 24 Z" fill="#00ff41"/>
+      </svg>
+      <h1>מסלול קידום</h1>
+      <div class="sub">PROMOTION TRACK · TRIGONOMETRY OPS</div>
+    </div>
+
+    <p style="font-size:0.82rem;line-height:1.7;color:var(--text-dim);margin-bottom:18px;border:1px solid var(--border);border-radius:10px;padding:12px;">
+      ברוכ/ה הבא/ה למסלול קידום! עליך להתקדם במסלול הדרגות: טוראי/ת, רב"ט, סמל/ת, סמל/ת ראשונ/ה, ואף מפקד/ת. המסלול כולל 6 שאלות, כל תשובה נכונה תקדם אותך בדרגה. יש לציין באיזה פונקציה נעשה שימוש לצורך הפתרון, ולכתוב את התוצאה עם דיוק של 2 ספרות אחרי הנקודה. קדימה, בהצלחה‼!
+    </p>
+
+    <div class="field">
+      <label>שם הטוראי/ת</label>
+      <input type="text" id="input-name" placeholder="הכנס/י שמך" autocomplete="off" />
+    </div>
+
+    <div class="gender-row">
+      <button class="gender-btn active" id="btn-male" onclick="setGender('M')">טוראי</button>
+      <button class="gender-btn" id="btn-female" onclick="setGender('F')">טוראית</button>
+    </div>
+
+    <button class="btn-start" onclick="startGame()">התחילו במסלול</button>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div id="screen-game" class="screen">
+  <div class="top-bar">
+    <div class="top-stat">
+      <div class="val" dir="ltr" id="display-rank" style="font-size:1rem"></div>
+      <div class="lbl">דרגה</div>
+    </div>
+    <div class="missiles-row" id="missiles-row"></div>
+    <div class="top-stat">
+      <div class="val" dir="ltr" id="display-mission">1/6</div>
+      <div class="lbl">יירוט</div>
+    </div>
+  </div>
+
+  <div class="scenario-box">
+    <div class="mission-label" id="mission-label">יירוט 1</div>
+    <p id="scenario-text"></p>
+  </div>
+
+  <div class="radar-box">
+    <svg id="radar-svg" width="220" height="160" viewBox="0 0 220 160"></svg>
+  </div>
+
+  <div class="fn-section">
+    <div class="fn-buttons">
+      <button class="fn-btn" id="fn-sin" onclick="selectFn('sin')">sin</button>
+      <button class="fn-btn" id="fn-cos" onclick="selectFn('cos')">cos</button>
+      <button class="fn-btn" id="fn-tan" onclick="selectFn('tan')">tan</button>
+    </div>
+  </div>
+
+  <div class="answer-section" id="answer-section" style="display:none">
+    <div class="answer-row">
+      <input class="answer-input" type="number" id="answer-input" placeholder="הכנס/י תשובה" step="0.1"
+             onkeydown="if(event.key==='Enter')checkAnswer()"/>
+      <button class="btn-check" onclick="checkAnswer()">בדיקה</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INTERCEPTION ANIMATION ══ -->
+<div id="intercept-anim">
+  <!-- missile SVG -->
+  <div class="ia-missile" id="ia-missile">
+    <svg viewBox="0 0 36 36" fill="none">
+      <polygon points="18,2 30,34 18,28 6,34" fill="#f59e0b"/>
+      <polygon points="18,2 30,34 18,28 6,34" fill="url(#mg)" opacity="0.7"/>
+      <defs>
+        <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#ff2040" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <circle cx="18" cy="8" r="4" fill="#fff" opacity="0.6"/>
+    </svg>
+  </div>
+  <!-- explosion rings -->
+  <div class="ia-explode r1"></div>
+  <div class="ia-explode r2"></div>
+  <div class="ia-explode r3"></div>
+  <!-- checkmark -->
+  <div class="ia-check" id="ia-check">
+    <svg width="72" height="72" viewBox="0 0 72 72">
+      <circle cx="36" cy="36" r="34" fill="rgba(0,255,65,0.2)" stroke="#00ff41" stroke-width="3"/>
+      <polyline points="18,36 30,50 54,22" fill="none" stroke="#00ff41" stroke-width="5"
+                stroke-linecap="round" stroke-linejoin="round"
+                stroke-dasharray="60" stroke-dashoffset="60">
+        <animate attributeName="stroke-dashoffset" from="60" to="0" dur="0.35s" begin="0.78s" fill="freeze"/>
+      </polyline>
+    </svg>
+  </div>
+</div>
+
+<!-- ══ RANK TOAST ══ -->
+<div id="rank-toast"></div>
+
+<!-- ══ GENERAL TOAST ══ -->
+<div id="general-toast"></div>
+
+<!-- ══ EXPLAIN OVERLAY ══ -->
+<div class="explain-overlay" id="explain-overlay">
+  <div class="explain-card">
+    <div class="explain-title">מטעויות לומדים 💡</div>
+    <div style="display:flex;justify-content:center;margin-bottom:10px;background:rgba(0,255,65,0.05);border:1.5px solid rgba(0,255,65,0.2);border-radius:12px;padding:8px;">
+      <svg id="explain-tri-svg" width="220" height="160" viewBox="0 0 220 160"></svg>
+    </div>
+    <div class="explain-answer" id="explain-answer"></div>
+    <div class="explain-section">
+      <div class="explain-label">דרך הפתרון:</div>
+      <div id="explain-steps"></div>
+    </div>
+    <button class="btn-check" style="width:100%;padding:13px;font-size:1rem;border-radius:12px;"
+            onclick="closeExplainAndNext()">לשאלה הבאה (Enter)</button>
+  </div>
+</div>
+
+<!-- ══ FEEDBACK OVERLAY ══ -->
+<div class="feedback-overlay" id="feedback-overlay">
+  <div class="feedback-icon" id="fb-icon"></div>
+  <div class="feedback-msg" id="fb-msg"></div>
+  <div class="feedback-pts" id="fb-pts"></div>
+</div>
+
+<!-- ══ OUTRO ══ -->
+<div id="screen-outro" class="screen">
+  <div class="outro-card">
+    <div style="font-size:2.5rem;margin-bottom:8px" id="outro-icon">🏆</div>
+    <div class="outro-rank" id="outro-rank"></div>
+    <div class="outro-stats">
+      <div class="stat-box"><div class="sv" id="stat-time"></div><div class="sl">זמן (שניות)</div></div>
+      <div class="stat-box"><div class="sv" id="stat-date"></div><div class="sl">תאריך</div></div>
+      <div class="stat-box" style="grid-column:span 2"><div class="sv" id="stat-hour"></div><div class="sl">שעה</div></div>
+    </div>
+
+    <table class="breakdown-table" id="perf-table" style="margin-bottom:16px;direction:rtl">
+      <thead>
+        <tr>
+          <th>שאלה</th>
+          <th>ניסיונות פונקציה</th>
+          <th>ניסיונות תוצאה</th>
+          <th>סה"כ</th>
+        </tr>
+      </thead>
+      <tbody id="perf-tbody"></tbody>
+    </table>
+    <button class="btn-copy idle" id="btn-copy" onclick="copyReport()">העתק דוח למורה</button>
+    <button class="btn-restart" onclick="location.reload()">משחק חדש</button>
+  </div>
+</div>
+
+<script>
+// ══ DATA ══
+// labels: { hyp, opp, adj, angle } — string value to show, '?' if unknown, null to hide
+// lines:  { hyp, opp, adj } — true = bright green, false = dim
+const MISSIONS = [
+  // ── SINE ──────────────────────────────────────────────
+  {
+    id:1, fn:'sin', find:'side',
+    scenario:'זווית α = 30°, היתר = 10 ק"מ. מה אורך הניצב שמול α?',
+    labels:{ hyp:'10', opp:'?', adj:null, angle:'30°' },
+    lines:{ hyp:true, opp:true, adj:false },
+    correctFn:'sin',
+    answer:+(10*Math.sin(30*Math.PI/180)).toFixed(2),   // 5.00
+    tolerance:0.2,
+    hint:'sin(30°) = ניצב מול ÷ יתר  →  x = 10 × sin(30°)',
+    unit:'ק"מ',
+    steps:[
+      {t:'eq',   c:'sin(זווית) = <span class="step-frac"><span class="sf-num">ניצב מול</span><span class="sf-den">יתר</span></span>'},
+      {t:'eq',   c:'sin(30°) = <span class="step-frac"><span class="sf-num">x</span><span class="sf-den">10</span></span>'},
+      {t:'eq',   c:'x = 10 × sin(30°) = 10 × 0.5'},
+      {t:'result',c:'x = 5.00 ק"מ'}
+    ]
+  },
+  {
+    id:2, fn:'sin', find:'angle',
+    scenario:'הניצב שמול α = 6 ק"מ, היתר = 10 ק"מ. מהי הזווית α?',
+    labels:{ hyp:'10', opp:'6', adj:null, angle:'?' },
+    lines:{ hyp:true, opp:true, adj:false },
+    correctFn:'sin',
+    answer:+(Math.asin(6/10)*180/Math.PI).toFixed(2),   // 36.87°
+    tolerance:1,
+    hint:'sin(α) = ניצב מול ÷ יתר  →  α = SHIFT sin(6 ÷ 10)',
+    unit:'°',
+    steps:[
+      {t:'eq',   c:'sin(α) = <span class="step-frac"><span class="sf-num">ניצב מול</span><span class="sf-den">יתר</span></span>'},
+      {t:'eq',   c:'sin(α) = <span class="step-frac"><span class="sf-num">6</span><span class="sf-den">10</span></span> = 0.6'},
+      {t:'text', c:'לוחצים על SHIFT ואז על sin'},
+      {t:'result',c:'α = 36.87°'}
+    ]
+  },
+  // ── COSINE ────────────────────────────────────────────
+  {
+    id:3, fn:'cos', find:'side',
+    scenario:'זווית α = 60°, היתר = 8 ק"מ. מה אורך הניצב הצמוד ל-α?',
+    labels:{ hyp:'8', opp:null, adj:'?', angle:'60°' },
+    lines:{ hyp:true, opp:false, adj:true },
+    correctFn:'cos',
+    answer:+(8*Math.cos(60*Math.PI/180)).toFixed(2),     // 4.00
+    tolerance:0.2,
+    hint:'cos(60°) = ניצב ליד ÷ יתר  →  x = 8 × cos(60°)',
+    unit:'ק"מ',
+    steps:[
+      {t:'eq',   c:'cos(זווית) = <span class="step-frac"><span class="sf-num">ניצב ליד</span><span class="sf-den">יתר</span></span>'},
+      {t:'eq',   c:'cos(60°) = <span class="step-frac"><span class="sf-num">x</span><span class="sf-den">8</span></span>'},
+      {t:'eq',   c:'x = 8 × cos(60°) = 8 × 0.5'},
+      {t:'result',c:'x = 4.00 ק"מ'}
+    ]
+  },
+  {
+    id:4, fn:'cos', find:'angle',
+    scenario:'הניצב הצמוד ל-α = 12 ק"מ, היתר = 13 ק"מ. מהי הזווית α?',
+    labels:{ hyp:'13', opp:null, adj:'12', angle:'?' },
+    lines:{ hyp:true, opp:false, adj:true },
+    correctFn:'cos',
+    answer:+(Math.acos(12/13)*180/Math.PI).toFixed(2),  // 22.62°
+    tolerance:1,
+    hint:'cos(α) = ניצב ליד ÷ יתר  →  α = SHIFT cos(12 ÷ 13)',
+    unit:'°',
+    steps:[
+      {t:'eq',   c:'cos(α) = <span class="step-frac"><span class="sf-num">ניצב ליד</span><span class="sf-den">יתר</span></span>'},
+      {t:'eq',   c:'cos(α) = <span class="step-frac"><span class="sf-num">12</span><span class="sf-den">13</span></span> ≈ 0.923'},
+      {t:'text', c:'לוחצים על SHIFT ואז על cos'},
+      {t:'result',c:'α = 22.62°'}
+    ]
+  },
+  // ── TANGENT ───────────────────────────────────────────
+  {
+    id:5, fn:'tan', find:'side',
+    scenario:'זווית α = 45°, הניצב הצמוד = 6 ק"מ. מה אורך הניצב שמול α?',
+    labels:{ hyp:null, opp:'?', adj:'6', angle:'45°' },
+    lines:{ hyp:false, opp:true, adj:true },
+    correctFn:'tan',
+    answer:+(6*Math.tan(45*Math.PI/180)).toFixed(2),     // 6.00
+    tolerance:0.2,
+    hint:'tan(45°) = ניצב מול ÷ ניצב ליד  →  x = 6 × tan(45°)',
+    unit:'ק"מ',
+    steps:[
+      {t:'eq',   c:'tan(זווית) = <span class="step-frac"><span class="sf-num">ניצב מול</span><span class="sf-den">ניצב ליד</span></span>'},
+      {t:'eq',   c:'tan(45°) = <span class="step-frac"><span class="sf-num">x</span><span class="sf-den">6</span></span>'},
+      {t:'eq',   c:'x = 6 × tan(45°) = 6 × 1'},
+      {t:'result',c:'x = 6.00 ק"מ'}
+    ]
+  },
+  {
+    id:6, fn:'tan', find:'angle',
+    scenario:'הניצב שמול α = 4 ק"מ, הניצב הצמוד = 3 ק"מ. מהי הזווית α?',
+    labels:{ hyp:null, opp:'4', adj:'3', angle:'?' },
+    lines:{ hyp:false, opp:true, adj:true },
+    correctFn:'tan',
+    answer:+(Math.atan(4/3)*180/Math.PI).toFixed(2),    // 53.13°
+    tolerance:1,
+    hint:'tan(α) = ניצב מול ÷ ניצב ליד  →  α = SHIFT tan(4 ÷ 3)',
+    unit:'°',
+    steps:[
+      {t:'eq',   c:'tan(α) = <span class="step-frac"><span class="sf-num">ניצב מול</span><span class="sf-den">ניצב ליד</span></span>'},
+      {t:'eq',   c:'tan(α) = <span class="step-frac"><span class="sf-num">4</span><span class="sf-den">3</span></span> ≈ 1.333'},
+      {t:'text', c:'לוחצים על SHIFT ואז על tan'},
+      {t:'result',c:'α = 53.13°'}
+    ]
+  }
+];
+
+// ══ STATE ══
+let state = {
+  name:'', gender:'M',
+  missionIdx:0,
+  score:0,
+  mistakes:0,        // wrong attempts on current question (fn + answer combined)
+  fnMistakes:0,      // wrong fn selections on current question
+  answerMistakes:0,  // wrong answer entries on current question
+  fnSelected:false,
+  results:[],        // {pts, errors, firstTry, fnErrors, answerErrors} per mission
+  streak:0,
+  maxStreak:0,
+  totalErrors:0,
+  startTime:null
+};
+
+function T(m,f){ return state.gender==='M'?m:f; }
+
+// ══ GENDER ══
+function setGender(g){
+  state.gender=g;
+  document.getElementById('btn-male').classList.toggle('active',g==='M');
+  document.getElementById('btn-female').classList.toggle('active',g==='F');
+}
+
+// ══ START ══
+function startGame(){
+  const n=document.getElementById('input-name').value.trim();
+  if(!n){document.getElementById('input-name').focus();return;}
+  state.name=n;
+  state.startTime=Date.now();
+  show('game');
+  buildMissilesRow();
+  loadMission(0);
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function buildMissilesRow(){
+  const row=document.getElementById('missiles-row');
+  row.innerHTML='';
+  for(let i=0;i<6;i++){
+    const d=document.createElement('div');
+    d.className='missile-dot'+(i===0?' active':'');
+    d.id='dot-'+i;
+    row.appendChild(d);
+  }
+}
+
+// ══ LOAD MISSION ══
+function loadMission(idx){
+  state.missionIdx=idx;
+  state.mistakes=0;
+  state.fnMistakes=0;
+  state.answerMistakes=0;
+  state.fnSelected=false;
+  const m=MISSIONS[idx];
+
+  document.getElementById('mission-label').textContent=`יירוט ${idx+1} מתוך 6`;
+  document.getElementById('display-mission').textContent=`${idx+1}/6`;
+  document.getElementById('scenario-text').textContent=m.scenario;
+
+  // reset buttons
+  ['sin','cos','tan'].forEach(fn=>{
+    const b=document.getElementById('fn-'+fn);
+    b.className='fn-btn';
+    b.disabled=false;
+  });
+  document.getElementById('answer-section').style.display='none';
+  document.getElementById('answer-input').value='';
+  const curCorrect=state.results.filter(r=>r.pts>0).length;
+  document.getElementById('display-rank').textContent=getRankByCorrect(curCorrect);
+
+  drawRadar(m);
+}
+
+// ══ DRAW TRIANGLE SVG (shared) ══
+function drawTriSVG(svgId, m){
+  const svg=document.getElementById(svgId);
+  svg.innerHTML='';
+  const lb=m.labels, ln=m.lines;
+
+  // Vertices: A=bottom-left (angle α), B=bottom-right (90°), C=top-right
+  const A={x:20,y:140}, B={x:180,y:140}, C={x:180,y:20};
+  const YELLOW='#FFFF00', DIM='rgba(0,255,65,0.35)', LINE_ON='#00ff41';
+
+  function line(p1,p2,on){
+    const el=document.createElementNS('http://www.w3.org/2000/svg','line');
+    el.setAttribute('x1',p1.x);el.setAttribute('y1',p1.y);
+    el.setAttribute('x2',p2.x);el.setAttribute('y2',p2.y);
+    el.setAttribute('stroke',on?LINE_ON:DIM);
+    el.setAttribute('stroke-width',on?3:1.5);
+    svg.appendChild(el);
+  }
+  function txt(x,y,text,size=11,anchor='middle',color=YELLOW){
+    const el=document.createElementNS('http://www.w3.org/2000/svg','text');
+    el.setAttribute('x',x);el.setAttribute('y',y);
+    el.setAttribute('fill',color);el.setAttribute('font-size',size);
+    el.setAttribute('font-weight','bold');
+    el.setAttribute('text-anchor',anchor);
+    el.setAttribute('font-family','Rubik,Heebo,sans-serif');
+    el.setAttribute('stroke','#000');el.setAttribute('stroke-width','3');
+    el.setAttribute('paint-order','stroke fill');
+    el.textContent=text;
+    svg.appendChild(el);
+  }
+
+  // Triangle sides
+  line(A,C, ln.hyp);   // hypotenuse
+  line(A,B, ln.adj);   // adjacent leg (horizontal)
+  line(B,C, ln.opp);   // opposite leg (vertical)
+
+  // Right-angle marker at B
+  const sq=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+  sq.setAttribute('points','168,140 168,128 180,128');
+  sq.setAttribute('stroke','#00ff41');sq.setAttribute('stroke-width','1.5');sq.setAttribute('fill','none');
+  svg.appendChild(sq);
+
+  // Labels — only draw if value is not null
+  if(lb.hyp!==null)  txt(74, 66,  'יתר: '+lb.hyp,         14);
+  if(lb.adj!==null)  txt(100,155, 'ניצב: '+lb.adj,          14);
+  if(lb.opp!==null)  txt(196,108, 'ניצב: '+lb.opp,          14, 'start');
+  if(lb.angle!==null){
+    const aLabel = lb.angle==='?' ? 'α = ?' : 'α = '+lb.angle;
+    txt(38, 132, aLabel, lb.angle==='?'?14:12, 'middle', YELLOW);
+  }
+}
+
+// ══ DRAW RADAR SVG ══
+function drawRadar(m){ drawTriSVG('radar-svg', m); }
+
+// ══ SELECT FUNCTION ══
+function selectFn(fn){
+  if(state.fnSelected) return;
+  const m=MISSIONS[state.missionIdx];
+  const btn=document.getElementById('fn-'+fn);
+
+  if(fn===m.correctFn){
+    state.fnSelected=true;
+    btn.className='fn-btn selected-correct';
+    ['sin','cos','tan'].forEach(f=>{ if(f!==fn) document.getElementById('fn-'+f).disabled=true; });
+    showAnswerSection(m);
+  } else {
+    state.fnMistakes++;
+    state.mistakes++;
+    state.totalErrors++;
+    btn.className='fn-btn selected-wrong';
+    setTimeout(()=>{ btn.className='fn-btn'; },700);
+    if(state.mistakes>=3){
+      revealAndAdvance(m);
+    } else {
+      showFeedback(false, T('לא מדויק, נסה שוב','לא מדויק, נסי שוב'), null, 1300);
+    }
+  }
+}
+
+function showAnswerSection(m){
+  document.getElementById('answer-section').style.display='block';
+  setTimeout(()=>document.getElementById('answer-input').focus(),100);
+}
+
+// ══ INTERCEPTION ANIMATION ══
+function playInterceptAnim(){
+  const el=document.getElementById('intercept-anim');
+  const missile=document.getElementById('ia-missile');
+  // reset
+  el.classList.remove('playing');
+  missile.classList.remove('go');
+  void el.offsetWidth; // force reflow
+  // play
+  el.classList.add('playing');
+  requestAnimationFrame(()=>{ missile.classList.add('go'); });
+  setTimeout(()=>{ el.classList.remove('playing'); missile.classList.remove('go'); }, 1500);
+}
+
+// ══ VICTORY SOUND (1st attempt only) — Web Audio API ══
+function playVictorySound(){
+  try {
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    // Ascending major triad arpeggio: C5 → E5 → G5
+    [[0,.0, 523.25],[0,.15,659.25],[0,.30,783.99]].forEach(([_,t,freq])=>{
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.type='sine'; osc.frequency.value=freq;
+      gain.gain.setValueAtTime(0,ctx.currentTime+t);
+      gain.gain.linearRampToValueAtTime(0.28,ctx.currentTime+t+0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.45);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime+t); osc.stop(ctx.currentTime+t+0.45);
+    });
+  } catch(e){}
+}
+
+// ══ RANK HELPERS ══
+function getRankByCorrect(n){
+  if(n>=6) return T('מפקד','מפקדת');
+  if(n>=4) return T('סמל ראשון','סמלת ראשונה');
+  if(n>=3) return T('סמל','סמלת');
+  if(n>=2) return T('רב"ט','רב"טית');
+  return T('טוראי','טוראית');
+}
+
+function showRankToast(msg){
+  const t=document.getElementById('rank-toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+function checkPromotion(prevCorrect, newCorrect){
+  const prev = getRankByCorrect(prevCorrect);
+  const curr = getRankByCorrect(newCorrect);
+  if(curr !== prev){
+    showRankToast(`🪖💐🎖️ מזל טוב לקידומך בדרגה מ${prev} ל${curr}!`);
+  }
+}
+
+// ══ CHECK ANSWER ══
+function checkAnswer(){
+  const m=MISSIONS[state.missionIdx];
+  const rawVal=parseFloat(document.getElementById('answer-input').value);
+  if(isNaN(rawVal)) return;
+  const val=parseFloat(rawVal.toFixed(2));
+
+  if(Math.abs(val-m.answer)<0.01){
+    const pts = state.mistakes===0?20 : state.mistakes===1?10 : state.mistakes===2?5 : 0;
+    state.score+=pts;
+    state.results.push({pts, firstTry:state.mistakes===0, errors:state.mistakes, fnErrors:state.fnMistakes, answerErrors:state.answerMistakes});
+    state.streak++;
+    state.maxStreak=Math.max(state.maxStreak,state.streak);
+    const prevCorrect = state.results.filter(r=>r.pts>0).length - 1;
+    checkPromotion(prevCorrect, prevCorrect + 1);
+    document.getElementById('dot-'+state.missionIdx).className='missile-dot done';
+    playInterceptAnim();                        // every correct answer
+    if(pts===20) playVictorySound();            // 1st attempt only
+    const msg = state.mistakes===0 ? T('כל הכבוד, תשובה נכונה!','כל הכבוד, תשובה נכונה!')
+              : T('נכון! כל הכבוד!','נכון! כל הכבוד!');
+    showFeedback(true, msg, null, 1600, ()=>nextMission());
+  } else {
+    state.answerMistakes++;
+    state.mistakes++;
+    state.totalErrors++;
+    state.streak=0;
+    if(state.mistakes>=3){
+      revealAndAdvance(m);
+    } else {
+      document.getElementById('answer-input').value='';
+      document.getElementById('answer-input').focus();
+      showFeedback(false, T('לא מדויק, נסה שוב','לא מדויק, נסי שוב'), null, 1300);
+    }
+  }
+}
+
+// ══ REVEAL & ADVANCE (3rd error) ══
+function revealAndAdvance(m){
+  state.results.push({pts:0, firstTry:false, errors:state.mistakes, fnErrors:state.fnMistakes, answerErrors:state.answerMistakes});
+  state.streak=0;
+  document.getElementById('dot-'+state.missionIdx).className='missile-dot failed';
+  showExplainOverlay(m);
+}
+
+function showExplainOverlay(m){
+  drawTriSVG('explain-tri-svg', m);
+  document.getElementById('explain-answer').innerHTML=
+    `<span dir="ltr">התשובה: ${m.answer}${m.unit}</span>`;
+  const stepsEl=document.getElementById('explain-steps');
+  stepsEl.innerHTML='';
+  (m.steps||[]).forEach(s=>{
+    const d=document.createElement('div');
+    if(s.t==='eq')     { d.className='explain-step-eq';     d.innerHTML=s.c; }
+    else if(s.t==='text')  { d.className='explain-step-text';   d.textContent=s.c; }
+    else if(s.t==='result'){ d.className='explain-step-result'; d.textContent=s.c; }
+    stepsEl.appendChild(d);
+  });
+  document.getElementById('explain-overlay').classList.add('show');
+  document._explainKey=function(e){ if(e.key==='Enter') closeExplainAndNext(); };
+  document.addEventListener('keydown', document._explainKey);
+}
+
+function closeExplainAndNext(){
+  document.removeEventListener('keydown', document._explainKey);
+  document.getElementById('explain-overlay').classList.remove('show');
+  nextMission();
+}
+
+// ══ GENERAL TOAST ══
+function showToast(msg, duration=3500){
+  const t=document.getElementById('general-toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'), duration);
+}
+
+// ══ FEEDBACK ══
+function showFeedback(success, msg, pts, duration, cb){
+  const ov=document.getElementById('feedback-overlay');
+  document.getElementById('fb-icon').textContent=success?'✅':'⚠️';
+  document.getElementById('fb-msg').innerHTML=msg;
+  document.getElementById('fb-msg').style.color=success?'#00ff41':'#fca5a5';
+  document.getElementById('fb-pts').innerHTML='';
+  ov.classList.add('show');
+  setTimeout(()=>{ ov.classList.remove('show'); if(cb) cb(); },duration);
+}
+
+// ══ NEXT MISSION ══
+function nextMission(){
+  const next=state.missionIdx+1;
+  if(next>=6){ endGame(); return; }
+  document.getElementById('dot-'+next).className='missile-dot active';
+  loadMission(next);
+}
+
+// ══ END GAME ══
+function endGame(){
+  const elapsed=Math.round((Date.now()-state.startTime)/1000);
+
+  // rank based on correct answers
+  const correctCount = state.results.filter(r=>r.pts>0).length;
+  let rank;
+  if(correctCount>=6) rank=T('מפקד','מפקדת');
+  else if(correctCount>=4) rank=T('סמל ראשון','סמלת ראשונה');
+  else if(correctCount>=3) rank=T('סמל','סמלת');
+  else if(correctCount>=2) rank=T('רב"ט','רב"טית');
+  else rank=T('טוראי','טוראית');
+
+  const celebrateAluf = correctCount === 6;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('he-IL');
+  const hourStr = now.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'});
+
+  document.getElementById('outro-icon').textContent = celebrateAluf ? '🏆' : '🎖️';
+  document.getElementById('outro-rank').textContent=rank;
+  document.getElementById('stat-time').textContent=elapsed;
+  document.getElementById('stat-date').textContent=dateStr;
+  document.getElementById('stat-hour').textContent=hourStr;
+  document.getElementById('display-rank').textContent=rank;
+
+  // Build attempts table
+  const tbody=document.getElementById('perf-tbody');
+  tbody.innerHTML='';
+  const tableLines=['פירוט ניסיונות:', 'שאלה | ניסיונות פונקציה | ניסיונות תוצאה | סה"כ'];
+  for(let i=0;i<state.results.length;i++){
+    const r=state.results[i];
+    const fnE=r.fnErrors||0, ansE=r.answerErrors||0, tot=fnE+ansE;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td class="${fnE>0?'err-cell':'ok-cell'}">${fnE}</td><td class="${ansE>0?'err-cell':'ok-cell'}">${ansE}</td><td>${tot}</td>`;
+    tbody.appendChild(tr);
+    tableLines.push(`שאלה ${i+1}: פונקציה=${fnE}, תוצאה=${ansE}, סה"כ=${tot}`);
+  }
+
+  let reportLines=[
+    `דוח משימה – מסלול קידום`,
+    `שם: ${state.name}`,
+    `דרגה: ${rank}`,
+    `זמן כולל: ${elapsed} שניות`,
+    `תאריך: ${dateStr}  |  שעה: ${hourStr}`,
+    ``,
+    ...tableLines
+  ];
+  const report=reportLines.join('\n');
+  window._reportText=report;
+
+  if(celebrateAluf){
+    setTimeout(()=>{
+      showFeedback(true, T(`איזה אלוף, ${state.name}!`,`איזו אלופה, ${state.name}!`), null, 2200);
+    },400);
+  }
+
+  show('outro');
+}
+
+// ══ COPY ══
+function copyReport(){
+  const btn=document.getElementById('btn-copy');
+  const ta=document.createElement('textarea');
+  ta.value=window._reportText||'';
+  ta.style.position='fixed';ta.style.left='-9999px';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+  btn.className='btn-copy copied';
+  btn.textContent='✅ הועתק!';
+  setTimeout(()=>{btn.className='btn-copy idle';btn.textContent='העתק דוח למורה';},3000);
+}
+</script>
+</body>
+</html>
+
